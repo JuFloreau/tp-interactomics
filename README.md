@@ -36,12 +36,12 @@ Par exemple, les 100 premières interactions protéine-protéine humaines dispon
 
 Numero de champ | Signification Biologique|
  --- | --- 
-1 | 
-2 |
-3 |
-4 |
-5 |
-6 |
+1 | Numero d'accession (unique) protéine 1
+2 | Numero d'accession (unique) protéine 2
+3 | Nom alternatif (unique) protéine 1
+4 | Nom alternatif (unique) protéine 2
+5 | Alias protéine 1 
+6 | Alias protéine 2
 
 ##### Utiliser le PMID de la publication pour récuperer les lignes MITAB des interactions rapportées dans l'étude.
 Une librairie pratique pour manipuler des requêtes HTTP est [requests](https://requests.readthedocs.io/en/master/), eg:
@@ -60,7 +60,7 @@ ans = httpReq.text
 ##### Quelles techniques experimentales mesurent les interactions rapportées dans cette publication?
 
 ```
-
+Pour mesurer les interactions, la technique expérimentale utilisé est la 2 hybride array.
 ```
 
 ##### Proposer deux expressions régulières et les champs auxquels les appliquer pour
@@ -68,31 +68,39 @@ ans = httpReq.text
 * Ne retenir que les lignes MITAB dans lesquelles chaque interactant possède un identifiant UNIPROT
 
 ```
-
+f=filter(lambda x:x[0].startswith("uniprotkb") and x[1].startswith("uniprotkb"),res)
+res = [_ for _ in f]
+print(f"{len(res)} avec deux uniprot")
 ```
 
 * Extraire les lignes MITAB impliquant uniquement des protéines d'EBV
 
 ```
-
+reEBV = "taxid:(1037[6-7]|82830)"
+for psqDatum in res :
+    if re.search(reEBV,psqDatum[9]) and re.search(reEBV,psqDatum[10]):
+        EbvEbv.append(psqDatum)
 ```
 
 * Extraire les lignes MITAB impliquant des protéines humaines et des protéines d'EBV 
 
 ```
-
+reHuman = "taxid:9606"
+for psqDatum in res :
+    if (re.search(reHuman,psqDatum[9]) and re.search(reEBV,psqDatum[10]) ) or (re.search(reHuman,psqDatum[10]) and re.search(reEBV,psqDatum[9])):
+        HumanEbv.append(psqDatum)
 ```
 
 ##### Combien de protéines EBV sont impliquées et pour combien d'interactions EBV/EBV?
 
 ```
-
+59
 ```
 
 ##### Combien de protéines humaines sont impliquées et pour combien d'interactions EBV/Human?
 
 ```
-
+171
 ```
 
 ###### Pour la suite du travail assurez-vous d'avoir les deux jeux de données MITAB suivants
